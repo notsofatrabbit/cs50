@@ -1,0 +1,50 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build (x86_64)",
+            "type": "shell",
+            "command": "clang",
+            "args": [
+                "-arch", "x86_64",
+                "-g",
+                "-o",
+                "${workspaceFolder}/${fileBasenameNoExtension}.x86_64",
+                "${fileDirname}/${fileBasename}"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "build (arm64)",
+            "type": "shell",
+            "command": "clang",
+            "args": [
+                "-arch", "arm64",
+                "-g",
+                "-o",
+                "${workspaceFolder}/${fileBasenameNoExtension}.arm64",
+                "${fileDirname}/${fileBasename}"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "build (Mach-O Universal)",
+            "type": "shell",
+            "command": "lipo",
+            "dependsOn":["build (x86_64)", "build (arm64)"],
+            "args": [
+                "-create",
+                "-output",
+                "${workspaceFolder}/${fileBasenameNoExtension}",
+                "${workspaceFolder}/${fileBasenameNoExtension}.x86_64",
+                "${workspaceFolder}/${fileBasenameNoExtension}.arm64"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
