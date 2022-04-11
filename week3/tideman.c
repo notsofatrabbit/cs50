@@ -38,6 +38,8 @@ void print_winner(void);
 void print_preferences(void);
 void printNewArrays(int array1[], int array2[]);
 void printPairs();
+void printPairsScores();
+void print_locked(void);
 
 int main(int argc, string argv[])
 {
@@ -92,11 +94,13 @@ int main(int argc, string argv[])
 
         record_preferences(ranks);
 
-        print_preferences();
-
         printf("\n");
     }
 
+    //User Func
+    //print_preferences();
+
+    //Standard Funcs
     add_pairs();
     sort_pairs();
     lock_pairs();
@@ -107,27 +111,13 @@ int main(int argc, string argv[])
 // Update ranks given a new vote
 bool vote(int rank, string name, int ranks[])
 {
+    for (int i = 0; i < candidate_count; i++){
 
-    for (int i = 0; i < sizeof(candidates); i++){
         if (strcmp(candidates[i], name) == 0){
-            ranks[i] = rank;
+            ranks[rank] = i;
             return true;
         }
     }
-    // Ranks correspond to inputed list of candidates
-    // candidates = [Alice, Bob, Charlie]
-    //                (0)   (1)    (2)
-    //Uses this postion to then input their selected rank 0-2 within their respective rank slot
-    // ie if voter votes
-    // Rank 1: Charlie
-    // Rank 2: Alice
-    // Rank 3: Bob
-
-    // Ranks will look like this Ranks = [ 1, 2, 0]
-    // Alice is first but ranked "2nd"
-    // Bob is second but ranked "3rd"
-    // Charlie is last but ranked "1st"
-
 
     return false;
 }
@@ -135,17 +125,14 @@ bool vote(int rank, string name, int ranks[])
 // Update preferences given one voter's ranks
 void record_preferences(int ranks[])
 {
-
-    printf("candiadate count: %d \n", candidate_count);
-
-    int cand_1 = 0;
-    int cand_2 = 0;
+    /*printf("Ranks: ");
+    for (int i = 0; i < candidate_count; i++){
+        printf("%i ", ranks[i]);
+    }
+    printf("\n");*/
 
     for (int i = 0; i < candidate_count-1; i++){
         for (int j = 1+i; j < candidate_count; j++){
-
-            cand_1 = ranks[i];
-            cand_2 = ranks[j];
 
             preferences[ranks[i]][ranks[j]] += 1;
 
@@ -162,25 +149,31 @@ void add_pairs()
         // run through all votes
     //compare alice to charlie
         // run throgh all votes   -> votes is a constant here of
+    int a = 0; //Stable counter, due to sub loops continous adding was an issues
 
     for (int i = 0; i < candidate_count-1; i++){
         for (int j = 1+i; j < candidate_count; j++){
 
             if(preferences[i][j] > preferences[j][i]){
-                    pairs[i].winner = i;
-                    pairs[i].loser  = j;
+                    pairs[a].winner = i;
+                    pairs[a].loser  = j;
                     pair_count += 1;
+                    a += 1;
+                    //printf("1st wins\n");
             }
             else if(preferences[i][j] < preferences[j][i]){
-                    pairs[i].winner = j;
-                    pairs[i].loser  = i;
+                    pairs[a].winner = j;
+                    pairs[a].loser  = i;
                     pair_count += 1;
+                    a+= 1;
+                    //printf("2nd wins\n");
             }
 
-            printf("Candidate 1: %s %i\n", candidates[i], preferences[i][j]);
-            printf("Candidate 2: %s %i\n", candidates[j], preferences[j][i]);
-            printf("pairs[i].winner: %d \n", pairs[i].winner);
-            printf("pairs[i].loser: %d \n\n", pairs[i].loser);
+            //printf("Candidate 1: %s %i\n", candidates[i], preferences[i][j]);
+            //printf("Candidate 2: %s %i\n", candidates[j], preferences[j][i]);
+            //printf("pairs[i].winner: %d \n", pairs[a].winner);
+            //printf("pairs[i].loser: %d \n\n", pairs[a].loser);
+            //printPairs();
         }
     }
 
@@ -198,13 +191,13 @@ void sort_pairs(void)
     //printf("holder.winner: %d \n", holder.winner);
     //printf("holder.loser: %d \n", holder.loser);
 
+    //printf("Start sort\n");
+
     while(sorted != 1){
 
         sorted = 1;
 
         for (int i = 0; i < pair_count-1; i++){
-
-            printPairs();
 
             //Getting the win margin between pairs
             int set_1 = preferences[pairs[i].winner][pairs[i].loser] - preferences[pairs[i].loser][pairs[i].winner];
@@ -218,15 +211,15 @@ void sort_pairs(void)
 
                 sorted = 0;
             }
-
-
         }
 
-
-
+        //printPairs();
+        //printPairsScores();
 
     }
 
+    //printPairs();
+    //printPairsScores();
 
     return;
 }
@@ -235,38 +228,95 @@ void sort_pairs(void)
 void lock_pairs(void)
 {
     // TODO
+    int closeCount;
+    int countNum = 0;
+
+    do{
+        closeCount = 0;
+
+        locked[pairs[countNum].loser][pairs[countNum].winner] = 1;
+        if (countNum > pair_count){
+            break;
+        }
+
+        for (int i = 0; i < candidate_count; i++){
+            int zeroRows = 0;
+
+            for (int j = 0; j < candidate_count; j++){
+                if (locked[i][j] == 0){
+                    zeroRows += 1;
+                }
+            }
+
+            if (zeroRows == candidate_count){
+                closeCount += 1;
+                //printf("Whose the winner: %d\n", i);
+            }
+        }
+
+        //printf("Close Count: %d\n", closeCount);
+        //print_locked();
+        countNum +=1;
+    }
+    while(closeCount > 1);
     return;
 }
 
 // Print the winner of the election
 void print_winner(void)
 {
-    // TODO
+    for (int i = 0; i < candidate_count; i++){
+            int zeroRows = 0;
+
+            for (int j = 0; j < candidate_count; j++){
+                if (locked[i][j] == 0){
+                    zeroRows += 1;
+                }
+            }
+
+            if (zeroRows == candidate_count){
+                printf("%s\n", candidates[i]);
+            }
+        }
     return;
 }
 
 void print_preferences(void)
 {
-    for (int a = 0; a < MAX; a++){
-        for(int b = 0; b < MAX; b++){
+    for (int a = 0; a < candidate_count; a++){
+        for(int b = 0; b < candidate_count; b++){
             printf("%d ", preferences[a][b]);
         }
         printf("\n");
     }
 
+    printf("\n");
 }
 
 void printNewArrays(int array1[], int array2[]){
 
     for (int a = 0; a < MAX; a++){
-        printf("%d ", array1[a]);
+        printf(" %d  ", array1[a]);
     }
     printf("\n");
 
     for (int a = 0; a < MAX; a++){
-        printf("%d ", array2[a]);
+        printf(" %d  ", array2[a]);
     }
     printf("\n");
+}
+
+void printPairsScores(){
+    for (int i = 0; i < pair_count; i++){
+        printf("[%d] ", preferences[pairs[i].winner][pairs[i].loser]);
+    }
+    printf("\n");
+
+    for (int i = 0; i < pair_count; i++){
+        printf("[%d] ", preferences[pairs[i].loser][pairs[i].winner]);
+    }
+    printf("\n\n");
+
 }
 
 void printPairs(){
@@ -281,3 +331,15 @@ void printPairs(){
     printf("\n\n");
 
 }
+
+void print_locked(void)
+{
+    for (int a = 0; a < candidate_count; a++){
+        for(int b = 0; b < candidate_count; b++){
+            printf("%d ", locked[a][b]);
+        }
+        printf("\n");
+    }
+
+}
+
