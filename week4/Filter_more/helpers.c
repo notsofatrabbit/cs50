@@ -61,6 +61,80 @@ void reflect(int height, int width, RGBTRIPLE image[height][width])
 // Blur image
 void blur(int height, int width, RGBTRIPLE image[height][width])
 {
+
+    RGBTRIPLE newImage[height][width];
+
+    printf("Height: %d", height);
+
+
+    RGBTRIPLE newNum;
+    newNum.rgbtRed = 0;
+    newNum.rgbtBlue = 0;
+    newNum.rgbtGreen = 0;
+
+    int counter = 0;
+    int checkCol = 0;
+    int checkRow = 0;
+
+    // Image Loop    
+    //for (int i = 0; i < height; i++){
+     //   for (int j = 0; j < width; j++){
+    for (int i = 0; i < 1; i++){
+        for (int j = 0; j < 2; j++){
+
+            printf("NEW BLOCK-----------\n");
+            // 9x9 loop
+            for (int a = -1; a < 2; a++){
+                for (int b = -1; b < 2; b++){
+
+                    
+                    printf("i + a = %i\n", i + a);
+                    printf("j + b = %i\n\n", j + b);
+                    checkRow = i + a;
+                    checkCol = j + b;
+
+                    if (0 <= i + a && height-1 >= i + a){
+                        if (0 <= j + b && width-1 >= j + b){
+                            newNum.rgbtRed += image[checkRow][checkCol].rgbtRed;
+                            newNum.rgbtBlue += image[checkRow][checkCol].rgbtBlue;
+                            newNum.rgbtGreen += image[checkRow][checkCol].rgbtGreen;
+                            counter += 1;
+
+                            printf("R: %i [%i]\n",image[i][j].rgbtRed, newNum.rgbtRed);
+                            printf("G: %i [%i]\n",image[i][j].rgbtGreen, newNum.rgbtGreen);
+                            printf("B: %i [%i]\n",image[i][j].rgbtBlue, newNum.rgbtBlue);
+                            printf("Counter: %i\n\n", counter);
+                        }
+                    }
+                }
+            }
+            
+            newImage[i][j].rgbtRed = newNum.rgbtRed/counter;
+            newImage[i][j].rgbtBlue = newNum.rgbtBlue/counter;
+            newImage[i][j].rgbtGreen = newNum.rgbtGreen/counter;
+
+            newNum.rgbtRed = 0;
+            newNum.rgbtGreen = 0;
+            newNum.rgbtBlue = 0;
+
+            printf("avg.R: %i\n",newImage[i][j].rgbtRed);
+            printf("avg.G: %i\n",newImage[i][j].rgbtGreen);
+            printf("avg.B: %i\n",newImage[i][j].rgbtBlue);
+                        
+            counter = 0;
+
+        }
+    }
+
+        for (int i = 0; i < height; i++){
+            for (int j = 0; j < width; j++){
+                image[i][j].rgbtBlue = newImage[i][j].rgbtRed; 
+                image[i][j].rgbtGreen = newImage[i][j].rgbtGreen;
+                image[i][j].rgbtBlue = newImage[i][j].rgbtBlue;
+            }
+        }
+
+
     return;
 }
 
